@@ -74,6 +74,22 @@ export function LinkedInIcon({ size = 18 }: IconProps) {
   );
 }
 
+export function PauseIcon({ size = 14 }: IconProps) {
+  return (
+    <svg className="icon" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true" focusable="false">
+      <path d="M5.5 3.5v9M10.5 3.5v9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function PlayIcon({ size = 14 }: IconProps) {
+  return (
+    <svg className="icon" viewBox="0 0 16 16" width={size} height={size} aria-hidden="true" focusable="false">
+      <path d="M5 3.4v9.2a.6.6 0 0 0 .9.5l7.4-4.6a.6.6 0 0 0 0-1L5.9 2.9a.6.6 0 0 0-.9.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function MenuIcon({ open }: { open: boolean }) {
   return (
     <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">

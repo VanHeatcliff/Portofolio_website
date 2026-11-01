@@ -1312,81 +1312,159 @@ main:focus {
   -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
 }
 
-/* Phones */
+/* Phones: absolutely positioned slots that animate when the slideshow advances */
 .media--mobile {
   display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding: clamp(1.75rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem) 0;
-  min-height: clamp(320px, 62vw, 500px);
+  flex-direction: column;
+  padding: clamp(1.5rem, 4.5vw, 2.75rem) clamp(1rem, 4vw, 2.5rem) clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.phones {
+  position: relative;
+  height: clamp(300px, 62vw, 460px);
+  overflow: hidden;
+  touch-action: pan-y;
+  /* Fade the bottom edge so cropped phones look intentional */
+  mask-image: linear-gradient(to bottom, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
 }
 
 .phone {
-  position: relative;
-  flex: 0 0 auto;
-  width: clamp(120px, 30%, 210px);
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  width: clamp(128px, 38%, 220px);
   padding: 5px;
   border-radius: 26px;
   background: linear-gradient(160deg, #2a2f37, #15181d);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 30px 60px -20px rgba(0, 0, 0, 0.85);
-  transition: transform 0.5s var(--ease);
+  overflow: hidden;
+  transform-origin: 50% 60%;
+  /* Phones moving to the back glide smoothly... */
+  transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1), filter 1s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+/* ...the phone coming to the front arrives with a slight spring overshoot. */
+.phone[data-slot="center"],
+.phone[data-slot="front"] {
+  transition-timing-function: cubic-bezier(0.34, 1.32, 0.5, 1);
+}
+
+/* Light sweep across the screen as it reaches the front */
+.phone::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 21px;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.22) 48%, rgba(255, 255, 255, 0.05) 56%, transparent 70%);
+  opacity: 0;
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+
+.phone[data-slot="center"]::after,
+.phone[data-slot="front"]::after {
+  animation: phone-glare 1.1s 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.phone[data-dir="-1"][data-slot="center"]::after,
+.phone[data-dir="-1"][data-slot="front"]::after {
+  animation-name: phone-glare-back;
+}
+
+@keyframes phone-glare {
+  0% {
+    opacity: 0;
+    transform: translateX(-130%);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(130%);
+  }
+}
+
+@keyframes phone-glare-back {
+  0% {
+    opacity: 0;
+    transform: translateX(130%);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-130%);
+  }
+}
+
+/* The front screen "wakes up" (brightens) while the phone travels forward */
+.phone[data-slot="center"] .phone__img,
+.phone[data-slot="front"] .phone__img {
+  animation: screen-wake 1s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+
+@keyframes screen-wake {
+  from {
+    filter: brightness(0.55) saturate(0.7);
+  }
 }
 
 .phone__img {
   width: 100%;
   height: auto;
   border-radius: 21px;
+  pointer-events: none;
+  user-select: none;
 }
 
-.media--count-3 .phone--1 {
-  transform: translate(22%, 10%) rotate(-6deg);
-  z-index: 1;
+/* Side phones are clickable to bring them forward */
+.phone[data-slot="left"],
+.phone[data-slot="right"],
+.phone[data-slot="back"] {
+  cursor: pointer;
+  filter: brightness(0.55) saturate(0.85);
 }
-.media--count-3 .phone--2 {
+
+.phone[data-slot="center"] {
+  z-index: 3;
+  transform: translateX(-50%);
+}
+
+.phone[data-slot="left"] {
+  z-index: 1;
+  transform: translateX(-122%) translateY(8%) rotate(-7deg) scale(0.86);
+}
+
+.phone[data-slot="right"] {
+  z-index: 1;
+  transform: translateX(22%) translateY(8%) rotate(7deg) scale(0.86);
+}
+
+.phone[data-slot="front"] {
   z-index: 2;
-  width: clamp(132px, 34%, 230px);
+  transform: translateX(-80%);
 }
-.media--count-3 .phone--3 {
-  transform: translate(-22%, 10%) rotate(6deg);
+
+.phone[data-slot="back"] {
   z-index: 1;
+  transform: translateX(-16%) translateY(7%) rotate(5deg) scale(0.9);
 }
 
-.media--count-2 {
-  gap: clamp(0.75rem, 3vw, 1.75rem);
-}
-.media--count-2 {
-  align-items: center;
-  padding-bottom: clamp(1.75rem, 5vw, 3rem);
-}
-.media--count-2 .phone {
-  width: clamp(130px, 40%, 240px);
-}
-.media--count-2 .phone--1 {
-  transform: translateY(-6%);
-}
-.media--count-2 .phone--2 {
-  transform: translateY(8%);
-}
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .feature:hover .media--count-3 .phone--1 {
-    transform: translate(16%, 7%) rotate(-8deg);
-  }
-  .feature:hover .media--count-3 .phone--3 {
-    transform: translate(-16%, 7%) rotate(8deg);
-  }
-  .feature:hover .media--count-3 .phone--2,
-  .feature:hover .media--count-2 .phone--1 {
-    transform: translateY(-9%);
-  }
-  .feature:hover .media--count-2 .phone--2 {
-    transform: translateY(4%);
+@media (hover: hover) {
+  .phone[data-slot="left"]:hover,
+  .phone[data-slot="right"]:hover,
+  .phone[data-slot="back"]:hover {
+    filter: brightness(0.8) saturate(0.95);
   }
 }
 
 /* Browser */
 .media--desktop {
-  padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem) clamp(1rem, 3vw, 1.75rem);
+  padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem) clamp(0.75rem, 2vw, 1.25rem);
 }
 
 .browser {
@@ -1397,8 +1475,10 @@ main:focus {
   transition: transform 0.5s var(--ease);
 }
 
-.feature:hover .browser {
-  transform: translateY(-4px);
+@media (hover: hover) {
+  .feature:hover .browser {
+    transform: translateY(-4px);
+  }
 }
 
 .browser__bar {
@@ -1409,6 +1489,11 @@ main:focus {
   padding: 0 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   background: #1b1f25;
+}
+
+.browser__dots,
+.browser__count {
+  flex: 0 0 52px;
 }
 
 .browser__dots {
@@ -1426,7 +1511,6 @@ main:focus {
 .browser__title {
   flex: 1;
   min-width: 0;
-  margin-right: 39px;
   padding: 0.15rem 0.6rem;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
@@ -1439,37 +1523,166 @@ main:focus {
   text-overflow: ellipsis;
 }
 
+.browser__count {
+  text-align: right;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .browser__view {
   position: relative;
   aspect-ratio: 16 / 9.8;
   background: #0f1114;
+  overflow: hidden;
+  touch-action: pan-y;
 }
 
+/*
+ * Resting state only: the current screen is visible on top, the others are hidden.
+ * The slide between them is played with the Web Animations API in ProjectMedia.tsx
+ * (incoming: clip-path wipe + parallax; outgoing: slides away and dims).
+ */
 .browser__img {
   position: absolute;
   inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  opacity: 0;
-  transition: opacity 0.45s var(--ease);
+  visibility: hidden;
+  will-change: transform, clip-path;
 }
 
 .browser__img.is-current {
-  opacity: 1;
+  z-index: 2;
+  visibility: visible;
 }
 
+/* Counter digit rolls in from the direction of travel */
+.browser__count-num {
+  display: inline-block;
+  color: var(--text-soft);
+  animation: count-in 0.6s var(--ease) both;
+}
+
+.browser__count-num[data-dir="-1"] {
+  animation-name: count-in-back;
+}
+
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(60%);
+  }
+}
+
+@keyframes count-in-back {
+  from {
+    opacity: 0;
+    transform: translateY(-60%);
+  }
+}
+
+/* ---- Slideshow controls (shared) ---- */
+.slide-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.slide-progress {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--accent);
+  animation-name: slide-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slide-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.slide-pause {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.slide-pause:hover {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+/* Dots (phones) */
+.slide-dots {
+  display: flex;
+  align-items: center;
+}
+
+.slide-dot {
+  display: inline-grid;
+  place-items: center;
+  height: 36px;
+  min-width: 28px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.slide-dot__bar {
+  position: relative;
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  overflow: hidden;
+  transition: width 0.4s var(--ease), background-color var(--dur) var(--ease);
+}
+
+.slide-dot:hover .slide-dot__bar {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.slide-dot.is-current .slide-dot__bar {
+  width: 32px;
+  background: rgba(var(--accent-rgb), 0.22);
+}
+
+.slide-dot.is-current.is-static .slide-dot__bar {
+  background: var(--accent);
+}
+
+/* Thumbnails (browser) */
 .thumbs {
   display: flex;
   justify-content: center;
   gap: 0.6rem;
-  margin-top: 1rem;
 }
 
 .thumb {
   position: relative;
-  width: clamp(64px, 18%, 96px);
+  width: clamp(64px, 18vw, 96px);
   padding: 0;
   border-radius: 8px;
   border: 1px solid var(--line-strong);
@@ -1487,7 +1700,12 @@ main:focus {
 
 .thumb.is-current {
   opacity: 1;
-  border-color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.6);
+}
+
+.thumb .slide-progress {
+  inset: auto 0 0;
+  height: 2px;
 }
 
 .thumb__img {
@@ -2017,6 +2235,15 @@ main:focus {
 
   .hero__ambient {
     animation: none;
+  }
+
+  /*
+   * The slideshow timer is this animation (its end advances the slide), so it must keep its
+   * real duration; the rule above would otherwise make slides change every few milliseconds.
+   * Slide changes themselves are instant here because transitions are disabled above.
+   */
+  .slide-progress {
+    animation-duration: var(--slide-duration, 3000ms) !important;
   }
 
   .scroll-cue__dot {

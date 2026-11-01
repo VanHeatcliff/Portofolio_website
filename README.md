@@ -86,6 +86,16 @@ media: {
 
 Projects with `media` are shown as large featured rows; projects without it appear as compact cards under "More projects". Mobile layouts show up to three phones.
 
+### Screenshot slideshow
+
+Each featured project rotates through its screenshots automatically (`src/components/useSlideshow.ts`, `ProjectMedia.tsx`):
+
+- **Phones:** the phones swap positions. The phone coming to the front arrives with a slight spring, its screen brightens, and a light sweep crosses it; the others glide to the sides and dim. Clicking a side phone brings it forward.
+- **Browser:** a directional "wipe + parallax" (Web Animations API, `useBrowserTransition` in `ProjectMedia.tsx`). The incoming screen is revealed by a clip-path wipe while drifting in from an 18% offset and settling from a 1.1× zoom; the outgoing screen slides the other way, shrinks slightly, and dims. Going back (an earlier thumbnail, or a swipe right) reverses the direction. The `01 / 03` counter rolls in the same direction. Duration and easing: `SLIDE_MS` / `SLIDE_EASE`.
+- A progress bar on the active dot/thumbnail shows time until the next screen. Change the interval with `SLIDE_INTERVAL_MS` in `useSlideshow.ts` (default 3000 ms).
+- Autoplay pauses on hover, on keyboard focus, when the gallery is off-screen or the tab is hidden, and via the pause button. Touch users can swipe left/right.
+- With `prefers-reduced-motion: reduce` (for example, Windows "Animation effects" turned off), autoplay still runs on the same interval, but there is no sliding: browser screens use a short cross-fade and phones swap instantly. Visitors can stop it with the pause button.
+
 Notes:
 
 - `src` starts with `/images/...` (no `public/`). Paths are case-sensitive on Vercel.
@@ -109,7 +119,8 @@ src/
     Hero.tsx            # hero with portrait
     Section.tsx         # numbered section wrapper
     ProjectCard.tsx     # featured project row + compact card
-    ProjectMedia.tsx    # phone frames / browser gallery (client)
+    ProjectMedia.tsx    # animated phone carousel / browser gallery (client)
+    useSlideshow.ts     # autoplay, pause, swipe, reduced-motion logic (client)
     RevealObserver.tsx  # scroll reveal, progressive enhancement (client)
     CopyEmail.tsx       # copy-to-clipboard button (client)
     BackToTop.tsx       # floating back-to-top link (client)
